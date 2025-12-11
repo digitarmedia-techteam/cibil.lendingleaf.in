@@ -4,6 +4,7 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wallet, Home, CheckCircle, Lock, Loader2 } from "lucide-react";
+import { getExtraParams} from "@/lib/trackingParam";
 
 type Step = 1 | 2 | 3;
 type LoanType = "home" | "personal";
@@ -260,6 +261,7 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
     setStep(2);
     
     try {
+      const extra = getExtraParams();
       const response = await fetch("/api/credit-score", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -267,6 +269,7 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
           fullname: name,
           mobile: phone,
           loanType: loanType,
+          ...extra,
         }),
       });
       

@@ -33,8 +33,8 @@ export async function POST(request: NextRequest) {
   try {
     const userIp = getClientIp(request);
     const user_agent = getUserAgent(request);
-
     const body = await request.json();
+    console.log("body : ",body)
     const {
       fullname,
       mobile,

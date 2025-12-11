@@ -6,6 +6,8 @@ import WhyChooseUs from "@/components/sections/WhyChooseUs";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import { getExtraParams} from "@/lib/trackingParam";
+
 import {
   TrendingUp,
   Shield,
@@ -321,7 +323,7 @@ export default function CreditScorePage() {
   const handleCheckScore = async () => {
     setIsSubmitting(true);
     setApiError(null);
-
+    const extra = getExtraParams();
     try {
       const response = await fetch("/api/credit-score", {
         method: "POST",
@@ -330,6 +332,7 @@ export default function CreditScorePage() {
           fullname: formData.fullName,
           mobile: formData.phone,
           loanType: "credit-score-check",
+          ...extra,
         }),
       });
 
