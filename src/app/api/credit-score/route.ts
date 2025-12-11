@@ -64,13 +64,7 @@ export async function POST(request: NextRequest) {
         { status: 400 }
       );
     }
-    const cibil_response: any = await checkCibil({ fullname, mobile});
-
-    const statusCode: string = cibil_response.data?.responseCode ?? "";
-    const decentroTxnId: string = cibil_response.data?.decentroTxnId ?? "";
-    const remark: string = cibil_response.data?.message ?? "";
-    const cibil_score: string = cibil_response?.data?.data?.scoreDetails?.[0]?.value ?? "";
-    const loan_type = "cibil";
+    
 
      const [existingRows]: any = await pool.execute(
       `SELECT cibil_score FROM loan_leads WHERE fullname = ? AND mobile = ? LIMIT 1`,
@@ -87,6 +81,14 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    const cibil_response: any = await checkCibil({ fullname, mobile});
+
+    const statusCode: string = cibil_response.data?.responseCode ?? "";
+    const decentroTxnId: string = cibil_response.data?.decentroTxnId ?? "";
+    const remark: string = cibil_response.data?.message ?? "";
+    const cibil_score: string = cibil_response?.data?.data?.scoreDetails?.[0]?.value ?? "";
+    const loan_type = "cibil";
+    
     const sql = `
       INSERT INTO loan_leads (
         fullname, mobile, cibil_score, cibil_response, remarks, loan_type,

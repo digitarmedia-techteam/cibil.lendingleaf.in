@@ -25,18 +25,21 @@ export async function checkCibil({ fullname, mobile }: CibilRequest): Promise<Ci
 
     const payload: CibilPayload = {
       name: fullname,
-      mobile: "91"+formattedMobile,
+      mobile: formattedMobile,
     };
-    console.log(payload)
-    const response = await fetch("https://in.decentro.tech/v2/bytes/credit-score", {
-      method: "POST",
-      headers: {
-        accept: "application/json",
-        client_id: process.env.DECENTRO_CLIENT_ID ?? "",
-        client_secret: process.env.DECENTRO_CLIENT_SECRET ?? "",
-        "content-type": "application/json",
-      },
-    });
+    const response = await fetch(
+      "https://in.decentro.tech/v2/bytes/credit-score",
+      {
+        method: "POST",
+        headers: {
+          "client-id": process.env.DECENTRO_CLIENT_ID || "",
+          "client-secret": process.env.DECENTRO_CLIENT_SECRET || "",
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      }
+    );
+
     const statusCode = response.status;
     const result = await response.json();
 
