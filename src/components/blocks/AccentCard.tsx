@@ -4,7 +4,9 @@ import * as React from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Wallet, Home, CheckCircle, Lock, Loader2 } from "lucide-react";
-import { getExtraParams} from "@/lib/trackingParam";
+import { getExtraParams } from "@/lib/trackingParam";
+import { toast } from 'react-hot-toast';
+import { generateClickId } from "@/lib/generateClickId";
 
 type Step = 1 | 2 | 3;
 type LoanType = "home" | "personal";
@@ -63,7 +65,7 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
   const [phone, setPhone] = React.useState("");
   const [loanType, setLoanType] = React.useState<LoanType>("personal");
   const [focusedField, setFocusedField] = React.useState<string | null>(null);
-  
+
   // Demo mode state
   const [isDemoMode, setIsDemoMode] = React.useState(true);
   const [demoScore, setDemoScore] = React.useState(650);
@@ -77,45 +79,45 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
   // Demo mode animation - smooth 350→random→350 with ease-in transitions
   React.useEffect(() => {
     if (!isDemoMode || hasInteracted) return;
-    
+
     const randomTargets = [500, 650, 780, 620, 720]; // Random target scores
     let currentTargetIndex = 0;
     let animationFrameId: number;
-    
+
     const animateToTarget = (startScore: number, targetScore: number, duration: number) => {
       const startTime = performance.now();
-      
+
       const animate = (now: number) => {
         const elapsed = now - startTime;
         const progress = Math.min(1, elapsed / duration);
         // Ease-in-out for smooth animation
-        const eased = progress < 0.5 
-          ? 2 * progress * progress 
+        const eased = progress < 0.5
+          ? 2 * progress * progress
           : 1 - Math.pow(-2 * progress + 2, 2) / 2;
-        
+
         const currentScore = Math.round(startScore + (targetScore - startScore) * eased);
         setDemoScore(currentScore);
-        
+
         if (progress < 1) {
           animationFrameId = requestAnimationFrame(animate);
         }
       };
-      
+
       animationFrameId = requestAnimationFrame(animate);
     };
-    
+
     const runCycle = () => {
       const targetScore = randomTargets[currentTargetIndex];
-      
+
       // 350 → target (1.5s)
       animateToTarget(350, targetScore, 1500);
-      
+
       setTimeout(() => {
         // Wait 3 seconds at target score
         setTimeout(() => {
           // target → 350 (1.5s)
           animateToTarget(targetScore, 350, 1500);
-          
+
           setTimeout(() => {
             // Wait 3 seconds at lower limit, then next cycle
             currentTargetIndex = (currentTargetIndex + 1) % randomTargets.length;
@@ -124,11 +126,11 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
         }, 3000); // 3s pause at max
       }, 1500);
     };
-    
+
     // Start first cycle
     setDemoScore(350);
     setTimeout(runCycle, 500); // Small initial delay
-    
+
     return () => {
       if (animationFrameId) {
         cancelAnimationFrame(animationFrameId);
@@ -148,12 +150,12 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
   // Fast transition animation when user starts interacting
   React.useEffect(() => {
     if (!isTransitioning) return;
-    
+
     let frameId: number;
     const startScore = transitionScore ?? demoScore;
     const duration = 400; // smooth 400ms transition
     const startTime = performance.now();
-    
+
     const animateTransition = (now: number) => {
       const elapsed = now - startTime;
       const progress = Math.min(1, elapsed / duration);
@@ -162,7 +164,7 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
       // Animate down to exactly MIN_SCORE (300) - our zero point
       const newScore = Math.round(startScore - (startScore - MIN_SCORE) * eased);
       setTransitionScore(Math.max(MIN_SCORE, newScore)); // Never go below 300
-      
+
       if (progress < 1) {
         frameId = requestAnimationFrame(animateTransition);
       } else {
@@ -171,10 +173,15 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
         setIsDemoMode(false);
       }
     };
-    
+
     frameId = requestAnimationFrame(animateTransition);
     return () => cancelAnimationFrame(frameId);
   }, [isTransitioning, transitionScore, demoScore]);
+
+  function isFullName(name: string): boolean {
+    const parts = name.trim().split(/\s+/);
+    return parts.length >= 2 && parts.every((part) => part.length >= 2);
+  }
 
   // Stop demo when user interacts - with smooth transition
   const handleInteraction = () => {
@@ -213,11 +220,11 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
 
   // Simplified display logic
   const isFormValid = name.trim().length >= 2 && phone.length === 10;
-  
+
   // Determine what score to display
   let displayScore: number | string = "---";
   let currentScoreValue = MIN_SCORE;
-  
+
   if (step === 3 && animScore !== null) {
     // Step 3: Show animated real score
     displayScore = animScore;
@@ -242,24 +249,27 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
       currentScoreValue = MAX_SCORE;
     }
   }
-  
+
   const band = displayScore !== "---" ? getBand(currentScoreValue) : null;
   const bandColor = getBandColor(band);
   const progress = Math.max(0, Math.min(1, (currentScoreValue - MIN_SCORE) / (MAX_SCORE - MIN_SCORE)));
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!isFormValid) return;
-    
-    // CRITICAL: Exit demo mode when user submits
+
+    if (!isFullName(name)) {
+      toast.error("Only Fullname Allowed");
+      return true;
+    }
+
     setIsDemoMode(false);
     setHasInteracted(true);
     setIsTransitioning(false);
     setTransitionScore(null);
     setAnimScore(null); // Reset so animation starts fresh
-    setStep(2);
-    
+
     try {
       const extra = getExtraParams();
       const response = await fetch("/api/credit-score", {
@@ -269,24 +279,26 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
           fullname: name,
           mobile: phone,
           loanType: loanType,
+          ClickId: ClickId,
           ...extra,
         }),
       });
-      
+
       const data = await response.json();
-      
+
       if (data.status && data.score) {
         setScore(data.score);
+        toast.success(data.msg)
         setStep(3);
       } else {
-        // Fallback to demo score if API fails
-        setScore(loanType === "home" ? 756 : 742);
-        setStep(3);
+        toast.error('Use Correct Fullname and Mobile Number.', { duration: 5000 });
       }
-    } catch (error) {
-      // Fallback to demo score if network fails
-      setScore(loanType === "home" ? 756 : 742);
+    } catch (error: any) {
+      toast.error(error)
       setStep(3);
+      window.location.reload();
+      // setScore(loanType === "home" ? 756 : 742);
+      // setStep(3);
     }
   };
 
@@ -312,14 +324,13 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
             <div className="relative flex-shrink-0 mx-auto sm:mx-0">
               <div className="relative h-[160px] w-[160px] sm:h-[180px] sm:w-[180px] md:h-[200px] md:w-[200px] flex items-center justify-center">
                 {/* Pulsing background ring */}
-                <div className={`absolute inset-1 rounded-full transition-all duration-500 ${
-                  isDemoMode && !hasInteracted 
-                    ? 'bg-gradient-to-br from-[#eefe92]/20 to-[#22c55e]/5 animate-pulse' 
-                    : step === 3 
-                      ? 'bg-gradient-to-br from-[#eefe92]/25 to-[#22c55e]/10 scale-100' 
-                      : 'bg-gradient-to-br from-[#f8fafc] to-[#f1f5f9] scale-95'
-                }`} />
-                
+                <div className={`absolute inset-1 rounded-full transition-all duration-500 ${isDemoMode && !hasInteracted
+                  ? 'bg-gradient-to-br from-[#eefe92]/20 to-[#22c55e]/5 animate-pulse'
+                  : step === 3
+                    ? 'bg-gradient-to-br from-[#eefe92]/25 to-[#22c55e]/10 scale-100'
+                    : 'bg-gradient-to-br from-[#f8fafc] to-[#f1f5f9] scale-95'
+                  }`} />
+
                 <svg viewBox="0 0 200 200" className="h-full w-full" aria-hidden="true">
                   <defs>
                     <linearGradient id="gaugeGrad" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -334,19 +345,19 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                       <stop offset="100%" stopColor="#d1d5db" />
                     </linearGradient>
                     <filter id="glow">
-                      <feGaussianBlur stdDeviation="3" result="blur"/>
-                      <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
+                      <feGaussianBlur stdDeviation="3" result="blur" />
+                      <feMerge><feMergeNode in="blur" /><feMergeNode in="SourceGraphic" /></feMerge>
                     </filter>
                     <filter id="innerShadow">
-                      <feOffset dx="0" dy="2"/>
-                      <feGaussianBlur stdDeviation="2" result="blur"/>
-                      <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowDiff"/>
-                      <feFlood floodColor="#000" floodOpacity="0.15"/>
-                      <feComposite in2="shadowDiff" operator="in"/>
-                      <feComposite in2="SourceGraphic" operator="over"/>
+                      <feOffset dx="0" dy="2" />
+                      <feGaussianBlur stdDeviation="2" result="blur" />
+                      <feComposite in2="SourceAlpha" operator="arithmetic" k2="-1" k3="1" result="shadowDiff" />
+                      <feFlood floodColor="#000" floodOpacity="0.15" />
+                      <feComposite in2="shadowDiff" operator="in" />
+                      <feComposite in2="SourceGraphic" operator="over" />
                     </filter>
                     <filter id="dropShadow">
-                      <feDropShadow dx="0" dy="3" stdDeviation="4" floodOpacity="0.15"/>
+                      <feDropShadow dx="0" dy="3" stdDeviation="4" floodOpacity="0.15" />
                     </filter>
                   </defs>
                   <g transform="translate(100 100)">
@@ -392,7 +403,7 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                     <text x="-78" y="42" fontSize="10" fill="#9ca3af" fontWeight="500">900</text>
                   </g>
                 </svg>
-               
+
                 {/* Center content */}
                 <div className="absolute inset-0 flex flex-col items-center justify-center">
                   {step === 2 ? (
@@ -409,11 +420,10 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                   ) : (
                     <>
                       <span className="text-[8px] sm:text-[9px] text-[#213d4f]/40 font-semibold uppercase tracking-widest">Credit Score</span>
-                      <span className={`text-4xl sm:text-5xl md:text-6xl font-black leading-none transition-all duration-300 ${
-                        step === 3 ? 'text-[#213d4f] scale-105' : isDemoMode && !hasInteracted ? 'text-[#213d4f]/60' : 'text-[#213d4f]/80'
-                      }`}>{displayScore}</span>
+                      <span className={`text-4xl sm:text-5xl md:text-6xl font-black leading-none transition-all duration-300 ${step === 3 ? 'text-[#213d4f] scale-105' : isDemoMode && !hasInteracted ? 'text-[#213d4f]/60' : 'text-[#213d4f]/80'
+                        }`}>{displayScore}</span>
                       {band && (
-                        <span 
+                        <span
                           className="text-xs font-bold mt-2 px-3 py-1 rounded-full transition-all duration-300"
                           style={{ backgroundColor: `${bandColor}18`, color: bandColor }}
                         >
@@ -424,7 +434,7 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                   )}
                 </div>
               </div>
-              
+
               {/* Demo tip below gauge */}
               {isDemoMode && !hasInteracted && step === 1 && (
                 <div className="text-center mt-1 sm:mt-2">
@@ -440,7 +450,7 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
               {step === 1 && (
                 <form onSubmit={handleSubmit} className="space-y-2.5 sm:space-y-3">
                   {/* Header */}
-                 
+
                   {/* Inputs with floating labels */}
                   <div className="space-y-3 sm:space-y-3.5">
                     <div className="relative group">
@@ -451,19 +461,17 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                         onChange={(e) => { setName(e.target.value); handleInteraction(); }}
                         onFocus={() => { setFocusedField('name'); handleInteraction(); }}
                         onBlur={() => setFocusedField(null)}
-                        className={`h-12 sm:h-13 pt-4 text-[17px] sm:text-sm border-2 bg-[#f8fafc] rounded-xl pr-10 transition-all duration-300 peer ${
-                          focusedField === 'name' 
-                            ? 'border-[#4d7c0f] bg-white ring-4 ring-[#eefe92]/20 shadow-lg shadow-[#4d7c0f]/5' 
-                            : name ? 'border-[#22c55e]/30 bg-white' : 'border-[#213d4f]/10 hover:border-[#213d4f]/20 hover:bg-white'
-                        }`}
+                        className={`h-12 sm:h-13 pt-4 text-[17px] sm:text-sm border-2 bg-[#f8fafc] rounded-xl pr-10 transition-all duration-300 peer ${focusedField === 'name'
+                          ? 'border-[#4d7c0f] bg-white ring-4 ring-[#eefe92]/20 shadow-lg shadow-[#4d7c0f]/5'
+                          : name ? 'border-[#22c55e]/30 bg-white' : 'border-[#213d4f]/10 hover:border-[#213d4f]/20 hover:bg-white'
+                          }`}
                       />
-                      <label 
+                      <label
                         htmlFor="name-input"
-                        className={`absolute left-3 transition-all duration-200 pointer-events-none ${
-                          focusedField === 'name' || name 
-                            ? 'top-1.5 text-[9px] sm:text-[10px] font-semibold text-[#4d7c0f]' 
-                            : 'top-1/2 -translate-y-1/2 text-xs sm:text-sm text-[#213d4f]/40'
-                        }`}
+                        className={`absolute left-3 transition-all duration-200 pointer-events-none ${focusedField === 'name' || name
+                          ? 'top-1.5 text-[9px] sm:text-[10px] font-semibold text-[#4d7c0f]'
+                          : 'top-1/2 -translate-y-1/2 text-xs sm:text-sm text-[#213d4f]/40'
+                          }`}
                       >
                         Full Name
                       </label>
@@ -480,19 +488,17 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                         onChange={(e) => { setPhone(e.target.value.replace(/\D/g, "").slice(0, 10)); handleInteraction(); }}
                         onFocus={() => { setFocusedField('phone'); handleInteraction(); }}
                         onBlur={() => setFocusedField(null)}
-                        className={`h-12 sm:h-13 pt-4 text-[17px] sm:text-sm border-2 bg-[#f8fafc] rounded-xl pr-10 transition-all duration-300 peer ${
-                          focusedField === 'phone' 
-                            ? 'border-[#4d7c0f] bg-white ring-4 ring-[#eefe92]/20 shadow-lg shadow-[#4d7c0f]/5' 
-                            : phone ? 'border-[#22c55e]/30 bg-white' : 'border-[#213d4f]/10 hover:border-[#213d4f]/20 hover:bg-white'
-                        }`}
+                        className={`h-12 sm:h-13 pt-4 text-[17px] sm:text-sm border-2 bg-[#f8fafc] rounded-xl pr-10 transition-all duration-300 peer ${focusedField === 'phone'
+                          ? 'border-[#4d7c0f] bg-white ring-4 ring-[#eefe92]/20 shadow-lg shadow-[#4d7c0f]/5'
+                          : phone ? 'border-[#22c55e]/30 bg-white' : 'border-[#213d4f]/10 hover:border-[#213d4f]/20 hover:bg-white'
+                          }`}
                       />
-                      <label 
+                      <label
                         htmlFor="phone-input"
-                        className={`absolute left-3 transition-all duration-200 pointer-events-none ${
-                          focusedField === 'phone' || phone 
-                            ? 'top-1.5 text-[9px] sm:text-[10px] font-semibold text-[#4d7c0f]' 
-                            : 'top-1/2 -translate-y-1/2 text-xs sm:text-sm text-[#213d4f]/40'
-                        }`}
+                        className={`absolute left-3 transition-all duration-200 pointer-events-none ${focusedField === 'phone' || phone
+                          ? 'top-1.5 text-[9px] sm:text-[10px] font-semibold text-[#4d7c0f]'
+                          : 'top-1/2 -translate-y-1/2 text-xs sm:text-sm text-[#213d4f]/40'
+                          }`}
                       >
                         Mobile Number
                       </label>
@@ -531,11 +537,10 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                     type="submit"
                     disabled={!isFormValid}
                     title={!isFormValid ? "Enter full name and a 10-digit mobile number" : undefined}
-                    className={`w-full h-10 sm:h-12 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all duration-300 ${
-                      isFormValid
-                        ? 'bg-[#213d4f] hover:bg-[#1a3240] text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer'
-                        : 'bg-gradient-to-r from-[#213d4f] via-[#2d5a6b] to-[#213d4f] text-white opacity-90 shadow-sm cursor-not-allowed'
-                    }`}
+                    className={`w-full h-10 sm:h-12 text-xs sm:text-sm font-bold rounded-lg sm:rounded-xl transition-all duration-300 ${isFormValid
+                      ? 'bg-[#213d4f] hover:bg-[#1a3240] text-white shadow-lg hover:shadow-xl hover:-translate-y-0.5 cursor-pointer'
+                      : 'bg-gradient-to-r from-[#213d4f] via-[#2d5a6b] to-[#213d4f] text-white opacity-90 shadow-sm cursor-not-allowed'
+                      }`}
                     aria-disabled={!isFormValid}
                   >
                     {isFormValid ? (
@@ -549,7 +554,7 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                       </span>
                     )}
                   </Button>
-                  
+
                   {/* Trust micro-text */}
                   <p className="text-[10px] text-center text-[#213d4f]/40 flex items-center justify-center gap-1">
                     <Lock className="w-3 h-3" />
@@ -587,8 +592,8 @@ export default function CreditScoreCard({ onScoreComplete }: CreditScoreCardProp
                       {band === "Poor" && `${name.split(" ")[0]}, let's find options for you.`}
                     </p>
                   </div>
-           
-           
+
+
                 </div>
               )}
             </div>

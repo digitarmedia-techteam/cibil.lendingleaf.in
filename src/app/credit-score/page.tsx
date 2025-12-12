@@ -6,7 +6,16 @@ import WhyChooseUs from "@/components/sections/WhyChooseUs";
 import { GridPattern } from "@/components/ui/grid-pattern";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { getExtraParams} from "@/lib/trackingParam";
+import { useSearchParams } from "next/navigation";
+import { generateClickId } from "@/lib/generateClickId";
+import Link from "next/link";
+
+interface Offer {
+  name: string;
+  highlights: string[];
+  badge: string;
+  href?: string;
+}
 
 import {
   TrendingUp,
@@ -57,6 +66,63 @@ export default function CreditScorePage() {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const [formVisible, setFormVisible] = useState(false);
   const [showFloatingButton, setShowFloatingButton] = useState(false);
+  
+  const searchParams =  useSearchParams();
+  const utm_content = searchParams.get("utm_content") || "";
+  const utm_source = searchParams.get("utm_source") || "";
+  const utm_medium = searchParams.get("utm_medium") || "";
+  const utm_campaign = searchParams.get("utm_campaign") || "";
+  const sub3 = searchParams.get("sub3") || "";
+  const sub4 = searchParams.get("sub4") || "";
+  const clickid = searchParams.get("clickid") || "";
+  const token = searchParams.get("token") || "";
+  const ClickId = generateClickId();
+  
+  const offers = [
+    {
+      name: "Navi: UPI, Investments & Loans",
+      highlights: ["✅ 100% digital process", "✅ Zero foreclosure charges"],
+      badge: "Fastest",
+      href: "https://track.digitarmedia.com/c?o=1334&a=1057&sub1=ft&sub2="+ClickId+"&sub3="+(token ? "wa" : sub3)+"&sub4="+(token ? token : sub4) +"&utm_content="+utm_content+"&utm_source="+utm_source+"&utm_medium="+utm_medium+"&utm_campaign="+utm_campaign+"&clickid="+clickid,
+      icon: "https://play-lh.googleusercontent.com/5BlEJb1cF_r6dSCvPkeIcBaWbdBgmIId5ZiNmpeT3cPEV8ojj5LAKpg0wIWAg88b6q4=s96-rw"
+    },
+    {
+      name: "Moneyview: UPI, Personal Loans",
+      highlights: ["💸 Instant personal loans", "✅ Clear fees, no hidden costs"],
+      badge: "Trusted",
+      href: "https://track.digitarmedia.com/c?o=1336&a=1057&sub1=ft&sub2="+ClickId+"&sub3="+(token ? "wa" : sub3)+"&sub4="+(token ? token : sub4) +"&utm_content="+utm_content+"&utm_source="+utm_source+"&utm_medium="+utm_medium+"&utm_campaign="+utm_campaign+"&clickid="+clickid,
+      icon: "https://play-lh.googleusercontent.com/s-t6tPiIzHsUY0rPNh_z1w6HdO3g6W1f4MGXzPv1XMOYaP6Sq7Dm3S6Pc2dkEv2Vnpg=s96-rw"
+    },
+    {
+      name: "Olyv: Loans & Credit Score",
+      highlights: ["💰 Get up to ₹5 Lakh Loans", "📝 No Collateral or Paperwork"],
+      badge: "Flexible",
+      href: "https://track.digitarmedia.com/c?o=1338&a=1057&sub1=ft&sub2="+ClickId+"&sub3="+(token ? "wa" : sub3)+"&sub4="+(token ? token : sub4) +"&utm_content="+utm_content+"&utm_source="+utm_source+"&utm_medium="+utm_medium+"&utm_campaign="+utm_campaign+"&clickid="+clickid,
+      icon: "https://play-lh.googleusercontent.com/DV33OfqPJOqMuJBKuaJSvU0sqJaf5iEbwB9ODy2fMWKc7py1cikASRnSFY_38bWQgPaA=s96-rw"
+    },
+    {
+      name: "BharatLoan: Personal Loan App",
+      highlights: ["💵 Apply & Get Funds Same Day", "📲 Entirely Digital — Apply from Mobile"],
+      badge: "Best Amount",
+      href: "https://track.digitarmedia.com/c?o=1335&a=1057&sub1=ft&sub2="+ClickId+"&sub3="+(token ? "wa" : sub3)+"&sub4="+(token ? token : sub4) +"&utm_content="+utm_content+"&utm_source="+utm_source+"&utm_medium="+utm_medium+"&utm_campaign="+utm_campaign+"&clickid="+clickid,
+      icon: "https://play-lh.googleusercontent.com/eBaECV4w9J5KsMJ1vL_TwknahTWLh8xEw3EsxQoW2Dx3m2rVxcFZc-trUNIYgFayGzQ=w480-h960-rw"
+    },
+    {
+      name: "InstaMoney Online Loan App",
+      highlights: ["💸 ₹5,000 – ₹50,000", "🔐 100% Online Process"],
+      badge: "Quick",
+      href: "https://track.digitarmedia.com/c?o=1339&a=1057&sub1=ft&sub2="+ClickId+"&sub3="+(token ? "wa" : sub3)+"&sub4="+(token ? token : sub4) +"&utm_content="+utm_content+"&utm_source="+utm_source+"&utm_medium="+utm_medium+"&utm_campaign="+utm_campaign+"&clickid="+clickid,
+      icon: "https://play-lh.googleusercontent.com/8_Lx1rq8kNR8XmClKqgeF1Qc42WV7Sue7ywG9SYix4V-ILWWo7dKjWnSzWoNFtDR7mP7=s96-rw"
+    },
+    {
+      name: "lendingplate-Personal Loan App",
+      highlights: ["💸 ₹10,000 – ₹2,50,000", "🔐 100% Online Process"],
+      badge: "Quick",
+      href: "https://track.digitarmedia.com/c?o=1337&a=1057&sub1=ft&sub2="+ClickId+"&sub3="+(token ? "wa" : sub3)+"&sub4="+(token ? token : sub4) +"&utm_content="+utm_content+"&utm_source="+utm_source+"&utm_medium="+utm_medium+"&utm_campaign="+utm_campaign+"&clickid="+clickid,
+      icon: "https://play-lh.googleusercontent.com/F2wWZOgnETxBcLgEnMNiFZ99i1C9usophWY6VUiPq8MGKcZZzVekw2xkoYuwTL-Sjow=s96-rw"
+    },
+  ];
+
 
   // Intersection observer for scroll animations
   useEffect(() => {
@@ -81,7 +147,7 @@ export default function CreditScorePage() {
   // Mobile floating button - only active on mobile
   useEffect(() => {
     const mediaQuery = window.matchMedia('(max-width: 1024px)');
-    
+
     const handleMediaChange = (e: MediaQueryListEvent | MediaQueryList) => {
       if (!e.matches) {
         // Desktop: always hide floating button
@@ -323,7 +389,7 @@ export default function CreditScorePage() {
   const handleCheckScore = async () => {
     setIsSubmitting(true);
     setApiError(null);
-    const extra = getExtraParams();
+    
     try {
       const response = await fetch("/api/credit-score", {
         method: "POST",
@@ -465,10 +531,9 @@ export default function CreditScorePage() {
           <div className="grid lg:grid-cols-[1fr_1.1fr] gap-4 lg:gap-16 items-center">
             {/* Left Content */}
             <div
-            id="tilllastcardactive"
-              className={`order-2 lg:order-1 space-y-3 sm:space-y-8 px-3 sm:px-0 ${
-                scoreComplete ? "hidden" : isVisible ? "animate-slide-up" : "opacity-0"
-              }`}
+              id="tilllastcardactive"
+              className={`order-2 lg:order-1 space-y-3 sm:space-y-8 px-3 sm:px-0 ${scoreComplete ? "hidden" : isVisible ? "animate-slide-up" : "opacity-0"
+                }`}
             >
               {/* Badge */}
               <div className="hidden lg:inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#eefe92]/40 border border-[#4d7c0f]/20 backdrop-blur-sm">
@@ -524,9 +589,8 @@ export default function CreditScorePage() {
                 ].map((stat, i) => (
                   <div
                     key={i}
-                    className={`relative group text-center p-3 sm:p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-[#213d4f]/5 hover:border-[#4d7c0f]/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${
-                      isVisible ? "animate-scale-in" : "opacity-0"
-                    }`}
+                    className={`relative group text-center p-3 sm:p-4 rounded-2xl bg-white/60 backdrop-blur-sm border border-[#213d4f]/5 hover:border-[#4d7c0f]/20 transition-all duration-300 hover:shadow-lg hover:-translate-y-1 ${isVisible ? "animate-scale-in" : "opacity-0"
+                      }`}
                     style={{ animationDelay: `${0.2 + i * 0.1}s` }}
                   >
                     <stat.icon className="w-5 h-5 text-[#4d7c0f] mx-auto mb-2 opacity-60 group-hover:opacity-100 transition-opacity" />
@@ -557,13 +621,12 @@ export default function CreditScorePage() {
                 ))}
               </div>
             </div>
-            
+
             {/* Eligible Offers Section - Shows after score is complete */}
-            <div 
-              id="finalstepactivedisplaycards" 
-              className={`order-2 lg:order-1 ${
-                scoreComplete ? "block" : "hidden absolute"
-              }`}
+            <div
+              id="finalstepactivedisplaycards"
+              className={`order-2 lg:order-1 ${scoreComplete ? "block" : "hidden absolute"
+                }`}
             >
               <div className="space-y-6">
                 {/* Section Header */}
@@ -583,101 +646,93 @@ export default function CreditScorePage() {
                       <span className="absolute bottom-1 left-0 right-0 h-[0.3em] bg-[#eefe92] -z-0 -rotate-1 rounded-sm"></span>
                     </span>
                   </h2>
-                  <p className="text-sm sm:text-base text-[#213d4f]/60 mb-6">
+                  {/* <p className="text-sm sm:text-base text-[#213d4f]/60 mb-6">
                     Based on your credit score, here are the best loan offers available for you
-                  </p>
+                  </p> */}
                 </div>
 
                 {/* Offers Container - Vertical Stack */}
                 <div className="space-y-4">
-                  {/* Offer Cards */}
-                  {[
-                    {
-                      name: "Navi Personal Loan",
-                      highlights: ["Up to ₹20 lakhs at 10.49% p.a.", "Instant approval in 5 minutes"],
-                      badge: "Fastest",
-                    },
-                    {
-                      name: "HDFC Bank Personal Loan",
-                      highlights: ["Pre-approved offer at 10.75% p.a.", "No prepayment charges"],
-                      badge: "Trusted",
-                    },
-                    {
-                      name: "ICICI Bank FlexiLoan",
-                      highlights: ["Flexible EMI options available", "₹50,000 to ₹15 lakhs"],
-                      badge: "Flexible",
-                    },
-                    {
-                      name: "Bajaj Finserv Personal Loan",
-                      highlights: ["Get up to ₹25 lakhs", "Minimal documentation required"],
-                      badge: "Best Amount",
-                    },
-                    {
-                      name: "Tata Capital Personal Loan",
-                      highlights: ["Competitive rates from 10.99%", "Quick disbursal in 48 hours"],
-                      badge: "Quick",
-                    },
-                  ].map((offer, index) => (
-                    <div
-                      key={index}
-                      className="group relative bg-white rounded-2xl border border-[#213d4f]/8 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden cursor-pointer"
-                    >
-                      {/* Gradient overlay on hover */}
-                      <div className="absolute inset-0 bg-gradient-to-r from-[#4d7c0f]/0 to-[#eefe92]/0 group-hover:from-[#4d7c0f]/5 group-hover:to-[#eefe92]/10 transition-all duration-300" />
-                      
-                      {/* Logo Badge at top right */}
-                      <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
-                        <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-br from-[#f8fdf2] to-[#eefe92]/20 border-2 border-[#4d7c0f]/15 flex items-center justify-center flex-shrink-0 group-hover:border-[#4d7c0f]/30 group-hover:shadow-lg transition-all duration-300">
-                          <span className="text-[8px] sm:text-[10px] font-black text-[#4d7c0f]/40 text-center px-1">{["Navi", "HDFC", "ICICI", "Bajaj", "Tata"][index]}</span>
-                        </div>
-                      </div>
+                  {offers.map((offer, index) => {
+                    const cardContent = (
+                      <div key={offer.name} className="group relative bg-white rounded-2xl border border-[#213d4f]/8 p-4 sm:p-6 shadow-sm hover:shadow-xl transition-all duration-300 hover:-translate-y-2 overflow-hidden">
+                        {/* Gradient overlay */}
+                        <div className="absolute inset-0 bg-gradient-to-r from-[#4d7c0f]/0 to-[#eefe92]/0 group-hover:from-[#4d7c0f]/5 group-hover:to-[#eefe92]/10 transition-all duration-300" />
 
-                      {/* Main Content */}
-                      <div className="relative z-10">
-                        {/* Header with Logo - Stack on mobile */}
-                        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 pr-16 sm:pr-0">
-                          <div className="flex-1 min-w-0">
-                            <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#213d4f] mb-1 group-hover:text-[#4d7c0f] transition-colors line-clamp-2">{offer.name}</h3>
-                            <div className="h-1 w-12 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-                          </div>
-                          {/* Logo Placeholder - Desktop only */}
-                          <div className="hidden sm:flex w-16 h-16 rounded-xl bg-gradient-to-br from-[#f8fdf2] to-[#eefe92]/20 border-2 border-[#4d7c0f]/10 items-center justify-center flex-shrink-0 group-hover:border-[#4d7c0f]/30 transition-colors">
-                            <span className="text-[9px] sm:text-xs font-black text-[#4d7c0f]/30 text-center">Logo</span>
+                        {/* Badge */}
+                        <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
+                          <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-br from-[#f8fdf2] to-[#eefe92]/20 border-2 border-[#4d7c0f]/15 flex items-center justify-center flex-shrink-0 group-hover:border-[#4d7c0f]/30 group-hover:shadow-lg transition-all duration-300">
+                            <span className="text-[8px] sm:text-[10px] font-black text-[#4d7c0f]/40 text-center px-1">
+                              {["Navi", "Moneyview", "Olyv", "BharatLoan", "InstaMoney"][index]}
+                            </span>
                           </div>
                         </div>
 
-                        {/* Highlights - Responsive layout */}
-                        <ul className="space-y-2 sm:space-y-2.5 mb-4 sm:mb-6 w-full sm:max-w-[85%]">
-                          {offer.highlights.map((highlight, i) => (
-                            <li key={i} className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-[#213d4f]/70 group-hover:text-[#213d4f] transition-colors">
-                              <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#4d7c0f]/20 flex items-center justify-center flex-shrink-0 -mt-0.5 sm:mt-0 group-hover:bg-[#4d7c0f]/40 transition-colors">
-                                <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#4d7c0f]" />
+                        {/* Main Content */}
+                        <div className="relative z-10">
+                          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 sm:gap-4 mb-4 pr-16 sm:pr-0">
+                            <div className="flex-1 min-w-0">
+                              <h3 className="text-base sm:text-lg md:text-xl font-bold text-[#213d4f] mb-1 group-hover:text-[#4d7c0f] transition-colors line-clamp-2">
+                                {offer.name}
+                              </h3>
+                              <div className="h-1 w-12 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                            </div>
+                            <div className="absolute top-3 sm:top-4 right-3 sm:right-4">
+                              <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-lg bg-gradient-to-br from-[#f8fdf2] to-[#eefe92]/20 border-2 border-[#4d7c0f]/15 flex items-center justify-center flex-shrink-0 group-hover:border-[#4d7c0f]/30 group-hover:shadow-lg transition-all duration-300 overflow-hidden">
+                                <img
+                                  src={offer.icon}                  // <-- logo URL
+                                  alt={`${offer.name} Logo`}        // accessibility
+                                  className="w-full h-full object-contain"
+                                />
                               </div>
-                              <span className="leading-snug">{highlight}</span>
-                            </li>
-                          ))}
-                        </ul>
+                            </div>
+                          </div>
 
-                        {/* CTA Button - Responsive sizing */}
-                        <button className="w-full h-10 sm:h-12 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] hover:from-[#3d6310] hover:to-[#1a9e4a] text-white font-bold text-sm sm:text-base rounded-lg sm:rounded-xl shadow-md hover:shadow-lg active:shadow-sm transition-all duration-300 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-1.5 sm:gap-2 group/btn">
-                          <span>Apply Now</span>
-                          <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 group-hover/btn:translate-x-1 transition-transform duration-300" />
-                        </button>
+                          {/* Highlights */}
+                          <ul className="space-y-2 sm:space-y-2.5 mb-4 sm:mb-6 w-full sm:max-w-[85%]">
+                            {offer.highlights.map((highlight, i) => (
+                              <li
+                                key={i}
+                                className="flex items-start gap-2 sm:gap-3 text-xs sm:text-sm text-[#213d4f]/70 group-hover:text-[#213d4f] transition-colors"
+                              >
+                                <div className="w-4 h-4 sm:w-5 sm:h-5 rounded-full bg-[#4d7c0f]/20 flex items-center justify-center flex-shrink-0 -mt-0.5 sm:mt-0 group-hover:bg-[#4d7c0f]/40 transition-colors">
+                                  <CheckCircle2 className="w-2.5 h-2.5 sm:w-3 sm:h-3 text-[#4d7c0f]" />
+                                </div>
+                                <span className="leading-snug">{highlight}</span>
+                              </li>
+                            ))}
+                          </ul>
+
+                          {/* CTA Button */}
+                          {offer.href ? (
+                            <Link href={offer.href} className="w-full inline-block">
+                              <button className="w-full cursor-pointer h-10 sm:h-12 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] hover:from-[#3d6310] hover:to-[#1a9e4a] text-white font-bold text-sm sm:text-base rounded-lg sm:rounded-xl shadow-md hover:shadow-lg active:shadow-sm transition-all duration-300 hover:-translate-y-1 active:translate-y-0 flex items-center justify-center gap-1.5 sm:gap-2">
+                                <span>Apply Now</span>
+                                <ArrowRight className="w-3.5 h-3.5 sm:w-4 sm:h-4 transition-transform duration-300 group-hover:translate-x-1" />
+                              </button>
+                            </Link>
+                          ) : (
+                            <button className="w-full h-10 sm:h-12 bg-gray-300 text-gray-600 font-bold text-sm sm:text-base rounded-lg sm:rounded-xl cursor-not-allowed cursor-pointer">
+                              Apply Now
+                            </button>
+                          )}
+                        </div>
+
+                        {/* Decorative Accent */}
+                        <div className="absolute bottom-0 right-0 w-20 h-20 bg-[#eefe92]/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
                       </div>
+                    );
 
-                      {/* Decorative accent */}
-                      <div className="absolute bottom-0 right-0 w-20 h-20 bg-[#eefe92]/20 rounded-full blur-2xl opacity-0 group-hover:opacity-100 transition-opacity duration-300 -z-10" />
-                    </div>
-                  ))}
+                    return cardContent;
+                  })}
                 </div>
               </div>
             </div>
 
             {/* Right Content - Credit Score Card */}
             <div
-              className={`order-1 lg:order-2 flex justify-center lg:justify-start mx-2 sm:mx-0 ${
-                isVisible ? "animate-scale-in" : "opacity-0"
-              }`}
+              className={`order-1 lg:order-2 flex justify-center lg:justify-start mx-2 sm:mx-0 ${isVisible ? "animate-scale-in" : "opacity-0"
+                }`}
               style={{ animationDelay: "0.3s" }}
             >
               <div className="relative w-full lg:w-auto -mt-14 lg:mt-0 ">
@@ -719,7 +774,7 @@ export default function CreditScorePage() {
 
         <GridPattern className="absolute inset-0 -z-10 opacity-30" />
       </section>
-      
+
 
       <div className="hidden lg:inline">
         {/* Credit Score Check Form Section - Hidden on Mobile */}
@@ -731,11 +786,10 @@ export default function CreditScorePage() {
             <div className="grid lg:grid-cols-2 gap-10 lg:gap-16 items-center">
               {/* Left - Form */}
               <div
-                className={`transition-all duration-700 ${
-                  formVisible
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 -translate-x-10"
-                }`}
+                className={`transition-all duration-700 ${formVisible
+                  ? "opacity-100 translate-x-0"
+                  : "opacity-0 -translate-x-10"
+                  }`}
               >
                 {/* Form Header */}
                 <div className="mb-8">
@@ -765,11 +819,10 @@ export default function CreditScorePage() {
                   {[1, 2].map((step) => (
                     <React.Fragment key={step}>
                       <div
-                        className={`relative flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all duration-300 ${
-                          formStep >= step
-                            ? "bg-gradient-to-br from-[#4d7c0f] to-[#22c55e] text-white shadow-lg shadow-[#4d7c0f]/30"
-                            : "bg-[#213d4f]/10 text-[#213d4f]/40"
-                        }`}
+                        className={`relative flex items-center justify-center w-10 h-10 rounded-full font-bold text-sm transition-all duration-300 ${formStep >= step
+                          ? "bg-gradient-to-br from-[#4d7c0f] to-[#22c55e] text-white shadow-lg shadow-[#4d7c0f]/30"
+                          : "bg-[#213d4f]/10 text-[#213d4f]/40"
+                          }`}
                       >
                         {formStep > step ? (
                           <CheckCircle2 className="w-5 h-5" />
@@ -782,9 +835,8 @@ export default function CreditScorePage() {
                       </div>
                       {step < 2 && (
                         <div
-                          className={`flex-1 h-1 rounded-full transition-all duration-500 ${
-                            formStep > step ? "bg-[#4d7c0f]" : "bg-[#213d4f]/10"
-                          }`}
+                          className={`flex-1 h-1 rounded-full transition-all duration-500 ${formStep > step ? "bg-[#4d7c0f]" : "bg-[#213d4f]/10"
+                            }`}
                         />
                       )}
                     </React.Fragment>
@@ -847,7 +899,7 @@ export default function CreditScorePage() {
                               setFormStep(2);
                             }}
                             disabled={!formData.fullName || !formData.phone}
-                            className="w-full h-13 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] hover:from-[#3d6310] hover:to-[#1a9e4a] text-white font-bold rounded-xl shadow-lg shadow-[#4d7c0f]/25 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed group"
+                            className="w-full h-13 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] hover:from-[#3d6310] hover:to-[#1a9e4a] text-white font-bold rounded-xl shadow-lg shadow-[#4d7c0f]/25 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed group  cursor-pointer"
                           >
                             <span>Continue</span>
                             <ChevronRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
@@ -923,7 +975,7 @@ export default function CreditScorePage() {
                                 setFormStep(1);
                                 setApiError(null);
                               }}
-                              className="h-13 px-6 border-2 border-[#213d4f]/10 text-[#213d4f] hover:bg-[#f8fdf2] rounded-xl"
+                              className="h-13 px-6 border-2 border-[#213d4f]/10 text-[#213d4f] hover:bg-[#f8fdf2] rounded-xl cursor-pointer"
                             >
                               Back
                             </Button>
@@ -941,7 +993,7 @@ export default function CreditScorePage() {
                                 formData.pan.length !== 10 ||
                                 isSubmitting
                               }
-                              className="flex-1 h-13 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] hover:from-[#3d6310] hover:to-[#1a9e4a] text-white font-bold rounded-xl shadow-lg shadow-[#4d7c0f]/25 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
+                              className="flex-1 h-13 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] hover:from-[#3d6310] hover:to-[#1a9e4a] text-white font-bold rounded-xl shadow-lg shadow-[#4d7c0f]/25 hover:shadow-xl transition-all duration-300 hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
                             >
                               {isSubmitting ? (
                                 <span className="flex items-center gap-2">
@@ -1037,7 +1089,7 @@ export default function CreditScorePage() {
                           setApiError(null);
                         }}
                         variant="outline"
-                        className="border-2 border-[#4d7c0f] text-[#4d7c0f] hover:bg-[#4d7c0f] hover:text-white rounded-xl"
+                        className="border-2 border-[#4d7c0f] text-[#4d7c0f] hover:bg-[#4d7c0f] hover:text-white rounded-xl cursor-pointer"
                       >
                         Check Another Score
                       </Button>
@@ -1066,11 +1118,10 @@ export default function CreditScorePage() {
 
               {/* Right - Visual/Details */}
               <div
-                className={`relative transition-all duration-700 delay-200 ${
-                  formVisible
-                    ? "opacity-100 translate-x-0"
-                    : "opacity-0 translate-x-10"
-                }`}
+                className={`relative transition-all duration-700 delay-200 ${formVisible
+                  ? "opacity-100 translate-x-0"
+                  : "opacity-0 translate-x-10"
+                  }`}
               >
                 {/* Main Visual Card */}
                 <div className="relative bg-gradient-to-br from-[#213d4f] via-[#2d5a6b] to-[#213d4f] rounded-3xl p-8 sm:p-10 overflow-hidden">
@@ -1373,11 +1424,10 @@ export default function CreditScorePage() {
                         onMouseEnter={() => setActiveSection(i)}
                       >
                         <div
-                          className={`absolute inset-0 bg-white/10 opacity-0 ${
-                            activeSection === i
-                              ? "opacity-100"
-                              : "group-hover:opacity-50"
-                          } transition-opacity`}
+                          className={`absolute inset-0 bg-white/10 opacity-0 ${activeSection === i
+                            ? "opacity-100"
+                            : "group-hover:opacity-50"
+                            } transition-opacity`}
                         />
                         <span className="text-xs sm:text-sm font-bold relative z-10">
                           {range.label}
@@ -1403,11 +1453,10 @@ export default function CreditScorePage() {
                   {scoreRanges.map((range, i) => (
                     <div
                       key={i}
-                      className={`relative p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${
-                        activeSection === i
-                          ? `border-${range.color}-400 bg-${range.color}-50/50 shadow-lg scale-105`
-                          : "border-transparent bg-white/50 hover:bg-white/80"
-                      }`}
+                      className={`relative p-5 rounded-2xl border-2 transition-all duration-300 cursor-pointer ${activeSection === i
+                        ? `border-${range.color}-400 bg-${range.color}-50/50 shadow-lg scale-105`
+                        : "border-transparent bg-white/50 hover:bg-white/80"
+                        }`}
                       onClick={() => setActiveSection(i)}
                     >
                       <div
@@ -1427,10 +1476,10 @@ export default function CreditScorePage() {
                             range.color === "red"
                               ? "#ef4444"
                               : range.color === "amber"
-                              ? "#f59e0b"
-                              : range.color === "lime"
-                              ? "#84cc16"
-                              : "#22c55e",
+                                ? "#f59e0b"
+                                : range.color === "lime"
+                                  ? "#84cc16"
+                                  : "#22c55e",
                         }}
                       >
                         {range.label}
@@ -1489,11 +1538,10 @@ export default function CreditScorePage() {
               {tips.map((tip, index) => (
                 <div
                   key={index}
-                  className={`group relative bg-white rounded-2xl sm:rounded-3xl border border-[#213d4f]/5 overflow-hidden transition-all duration-500 ${
-                    hoveredTip === index
-                      ? "shadow-2xl scale-[1.02]"
-                      : "shadow-lg hover:shadow-xl"
-                  }`}
+                  className={`group relative bg-white rounded-2xl sm:rounded-3xl border border-[#213d4f]/5 overflow-hidden transition-all duration-500 ${hoveredTip === index
+                    ? "shadow-2xl scale-[1.02]"
+                    : "shadow-lg hover:shadow-xl"
+                    }`}
                   onMouseEnter={() => setHoveredTip(index)}
                   onMouseLeave={() => setHoveredTip(null)}
                 >
@@ -1587,15 +1635,14 @@ export default function CreditScorePage() {
 
         {/* Mobile Floating CTA Button - Only show when form is out of view */}
         <div
-          className={`lg:hidden fixed bottom-6 left-4 right-4 z-50 transition-all duration-300 ${
-            showFloatingButton
-              ? "opacity-100 translate-y-0 pointer-events-auto"
-              : "opacity-0 translate-y-20 pointer-events-none"
-          }`}
+          className={`lg:hidden fixed bottom-6 left-4 right-4 z-50 transition-all duration-300 ${showFloatingButton
+            ? "opacity-100 translate-y-0 pointer-events-auto"
+            : "opacity-0 translate-y-20 pointer-events-none"
+            }`}
         >
           <button
             onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
-            className="w-full h-14 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] hover:from-[#3d6310] hover:to-[#1a9e4a] text-white font-bold rounded-2xl shadow-2xl shadow-[#4d7c0f]/40 flex items-center justify-center gap-2 active:scale-95 transition-all duration-200"
+            className="w-full h-14 bg-gradient-to-r from-[#4d7c0f] to-[#22c55e] hover:from-[#3d6310] hover:to-[#1a9e4a] text-white font-bold rounded-2xl shadow-2xl shadow-[#4d7c0f]/40 flex items-center justify-center gap-2 active:scale-95 transition-all duration-200 cursor-pointer"
           >
             {/* <Sparkles className="w-5 h-5" /> */}
             <span>Check My Score for Free</span>

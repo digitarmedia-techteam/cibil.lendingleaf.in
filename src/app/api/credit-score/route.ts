@@ -39,6 +39,7 @@ export async function POST(request: NextRequest) {
       fullname,
       mobile,
       loanType = "",
+      ClickId ="",
       landing_page = "",
       utm_content = "",
       utm_source = "",
@@ -63,11 +64,9 @@ export async function POST(request: NextRequest) {
         { status: false, msg: "Invalid mobile number format" },
         { status: 400 }
       );
-    }
-    
-
-     const [existingRows]: any = await pool.execute(
-      `SELECT cibil_score FROM loan_leads WHERE fullname = ? AND mobile = ? LIMIT 1`,
+    }  
+    const [existingRows]: any = await pool.execute(
+      `SELECT cibil_score, remarks FROM loan_leads WHERE fullname = ? AND mobile = ? LIMIT 1`,
       [fullname, mobile]
     );
 
@@ -75,7 +74,24 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           status: true,
-          score: existingRows[0].cibil_score
+          score: existingRows[0].cibil_score,
+          msg :  existingRows[0].remarks
+        },
+        { status: 200 }
+      );
+    }
+
+    const [apilimit]: any = await pool.execute(
+      `SELECT cibil_score, remarks FROM loan_leads WHERE user_agent = ? AND ip_address = ? AND created_at >= NOW() - INTERVAL 30 DAY`,
+      [user_agent, userIp]
+    );
+
+    if (apilimit.length == 2) {
+      return NextResponse.json(
+        {
+          status: true,
+          score: "",
+          msg: "30 Days limit for credit-score checks exceeded."
         },
         { status: 200 }
       );
@@ -93,9 +109,9 @@ export async function POST(request: NextRequest) {
       INSERT INTO loan_leads (
         fullname, mobile, cibil_score, cibil_response, remarks, loan_type,
         landing_page, utm_content, utm_source, utm_medium, utm_campaign,
-        ip_address, user_agent, sub1, sub2, sub3, sub4, statusCode, decentroTxnId
+        ip_address, user_agent, sub1, sub2, sub3, sub4, statusCode, decentroTxnId, ClickId
       )
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+      VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `;
 
     const values = [
@@ -117,7 +133,8 @@ export async function POST(request: NextRequest) {
       sub3,
       sub4,
       statusCode,
-      decentroTxnId
+      decentroTxnId,
+      ClickId
     ];
 
     const [insertScoreDetail]: any = await pool.execute(sql, values);
